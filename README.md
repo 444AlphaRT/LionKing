@@ -148,29 +148,76 @@ The HUD uses Unity UI and TextMeshPro and includes:
 - **Survival timer**:
   - Text in a corner of the screen, always visible during gameplay.
 
-All UI scripts follow the rule:
-
-> They **only read data from** `PlayerStats` / `GameManager` and **never change gameplay logic**.
-
 ---
 
-## 🧱 Project Structure (Scripts)
+@startuml
 
-Example structure:
+class PlayerController {
+    - movementSpeed
+    - rb2d
+    + HandleMovement()
+}
 
-```text
-Assets/
-  Scripts/
-    Player/
-      PlayerController.cs
-      PlayerStats.cs
-    Managers/
-      GameManager.cs
-      FoodSpawner.cs
-    Collectibles/
-      FoodCollectible.cs
-      FoodLifetime.cs
-    UI/
-      HeartsUI.cs
-      HungerUI.cs
-      SurvivalTimerUI.cs
+class PlayerStats {
+    - maxHearts
+    - currentHearts
+    - maxFoodUnits
+    - currentFoodUnits
+    + AddFoodUnits()
+    + ReduceFoodOverTime()
+    + IsDead()
+}
+
+class HeartsUI {
+    - heartSprites
+    + UpdateHearts()
+}
+
+class HungerUI {
+    - foodIcons
+    + UpdateHunger()
+}
+
+class SurvivalTimerUI {
+    - timerText
+    + UpdateTimer()
+}
+
+class GameManager {
+    - survivalTimeSeconds
+    - isGameOver
+    + GetSurvivalTime()
+    + RestartLevel()
+    - HandleGameOver()
+}
+
+class FoodSpawner {
+    - minSpawnPoint
+    - maxSpawnPoint
+    - foodItemsPerSpawn
+    - spawnIntervals
+    + SpawnFoodWave()
+}
+
+class FoodCollectible {
+    - foodUnitsGranted
+    + OnTriggerEnter2D()
+}
+
+class FoodLifetime {
+    - minLifetimeSeconds
+    - maxLifetimeSeconds
+    + DestroyAfterDelay()
+}
+
+PlayerController --> PlayerStats : uses
+GameManager --> PlayerStats : checks IsDead()
+SurvivalTimerUI --> GameManager : reads time
+HeartsUI --> PlayerStats : reads hearts
+HungerUI --> PlayerStats : reads food
+FoodSpawner --> FoodCollectible : instantiates
+FoodCollectible --> PlayerStats : AddFoodUnits()
+FoodCollectible --> FoodLifetime : lifetime optional
+
+@enduml
+      
