@@ -4,7 +4,7 @@ A small **top–down survival game** built in Unity for the course assignment.
 
 You play as **young Simba** exploring the savanna, searching for food and trying to survive as long as possible, while managing **health** and **hunger** and avoiding death by starvation.
 
-Link to play in itch.io: 
+Link to play in itch.io: https://alpha444rt.itch.io/lionking
 ---
 
 ## 🎮 Core Gameplay
