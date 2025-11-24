@@ -150,74 +150,101 @@ The HUD uses Unity UI and TextMeshPro and includes:
 
 ---
 
-@startuml
 
-class PlayerController {
-    - movementSpeed
-    - rb2d
-    + HandleMovement()
-}
+---
 
-class PlayerStats {
-    - maxHearts
-    - currentHearts
-    - maxFoodUnits
-    - currentFoodUnits
-    + AddFoodUnits()
-    + ReduceFoodOverTime()
-    + IsDead()
-}
+## UML 
 
-class HeartsUI {
-    - heartSprites
-    + UpdateHearts()
-}
+```mermaid
+classDiagram
+    %% === CORE GAMEPLAY CLASSES ===
+    class PlayerController {
+        - float movementSpeed
+        - Rigidbody2D rb2d
+        - PlayerStats playerStats
+        + void HandleMovement()
+        + void HandleInput()
+    }
 
-class HungerUI {
-    - foodIcons
-    + UpdateHunger()
-}
+    class PlayerStats {
+        - int maxHearts
+        - int currentHearts
+        - int maxFoodUnits
+        - int currentFoodUnits
+        - float foodTimer
+        - float starvationTimer
+        + void AddFoodUnits(int amount)
+        + void TakeDamage(int amount)
+        + bool IsDead()
+        + int GetCurrentHearts()
+        + int GetCurrentFoodUnits()
+    }
 
-class SurvivalTimerUI {
-    - timerText
-    + UpdateTimer()
-}
+    class GameManager {
+        - PlayerStats playerStats
+        - PlayerController playerController
+        - GameObject gameOverPanel
+        - float survivalTimeSeconds
+        - bool isGameOver
+        + void RestartLevel()
+        + float GetSurvivalTimeSeconds()
+        - void HandleGameOver()
+    }
 
-class GameManager {
-    - survivalTimeSeconds
-    - isGameOver
-    + GetSurvivalTime()
-    + RestartLevel()
-    - HandleGameOver()
-}
+    %% === WORLD / FOOD ===
+    class FoodSpawner {
+        - GameObject commonFoodPrefab
+        - GameObject rareFoodPrefab
+        - Transform minSpawnPoint
+        - Transform maxSpawnPoint
+        - int foodItemsPerSpawn
+        - float minSpawnIntervalSeconds
+        - float maxSpawnIntervalSeconds
+        - float rareFoodChance
+        + void Start()
+        + void SpawnFoodWave()
+    }
 
-class FoodSpawner {
-    - minSpawnPoint
-    - maxSpawnPoint
-    - foodItemsPerSpawn
-    - spawnIntervals
-    + SpawnFoodWave()
-}
+    class FoodCollectible {
+        - int foodUnitsGranted
+        + void OnTriggerEnter2D(Collider2D other)
+    }
 
-class FoodCollectible {
-    - foodUnitsGranted
-    + OnTriggerEnter2D()
-}
+    class FoodLifetime {
+        - float minLifetimeSeconds
+        - float maxLifetimeSeconds
+        + void OnEnable()
+    }
 
-class FoodLifetime {
-    - minLifetimeSeconds
-    - maxLifetimeSeconds
-    + DestroyAfterDelay()
-}
+    %% === UI LAYERS ===
+    class HeartsUI {
+        - PlayerStats playerStats
+        - Image[] heartImages
+        + void RefreshHearts()
+    }
 
-PlayerController --> PlayerStats : uses
-GameManager --> PlayerStats : checks IsDead()
-SurvivalTimerUI --> GameManager : reads time
-HeartsUI --> PlayerStats : reads hearts
-HungerUI --> PlayerStats : reads food
-FoodSpawner --> FoodCollectible : instantiates
-FoodCollectible --> PlayerStats : AddFoodUnits()
-FoodCollectible --> FoodLifetime : lifetime optional
+    class HungerUI {
+        - PlayerStats playerStats
+        - Image[] foodImages
+        + void RefreshHunger()
+    }
 
-@enduml
+    class SurvivalTimerUI {
+        - GameManager gameManager
+        - TextMeshProUGUI timerText
+        + void Update()
+    }
+
+    %% === RELATIONSHIPS ===
+    PlayerController --> PlayerStats : uses
+    GameManager --> PlayerStats : reads status
+    GameManager --> PlayerController : disables on game over
+
+    HeartsUI --> PlayerStats : reads hearts
+    HungerUI --> PlayerStats : reads food
+    SurvivalTimerUI --> GameManager : reads time
+
+    FoodSpawner --> FoodCollectible : instantiates
+    FoodCollectible --> PlayerStats : AddFoodUnits()
+    FoodCollectible --> FoodLifetime : has lifetime
       
